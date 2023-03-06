@@ -144,6 +144,7 @@ export default {
     drawAmidaBridge () {
       // あみだ参加者・選択肢のロック
       this.noEdit = true;
+      // あみだ結果の判定用に参加者のidだけの配列を生成
       const personIds = this.persons.map(({id}) => id);
       // 横線情報を含むあみだ配列を生成して上書きする
       this.amidaArray = this.createAmidaArray().map((row, rowIdx) => {
@@ -167,21 +168,22 @@ export default {
           return col;
         });
       });
-      this.persons = this.persons.map(({id, label, value, color}) => ({
+      // あみだ結果を見やすくするため、参加者の入力欄に背景色を追加
+      this.persons = this.persons.map(({id, label, value, color, bgColor}) => ({
         id,
         label,
         value,
-        bgColor: color
+        bgColor: color || bgColor
       }));
+      // あみだ結果に基づいて選択肢と参加者を紐づけて表示
       this.choices = this.choices.map((choice, idx) => {
-        console.log(personIds, personIds[idx])
         const targetPerson = this.persons.find(({id}) => id === personIds[idx]);
-        console.log(targetPerson, this.persons);
         choice.label = targetPerson.value + ' さん';
         choice.bgColor = targetPerson.bgColor;
         return choice;
       });
     },
+    // ランダム色生成ロジック
     getColor () {
       const color = [
         Math.trunc(Math.random() * 255),
@@ -195,7 +197,7 @@ export default {
       return `rgb(${color.join()})`;
 
       function isMonotone ([r, g, b]) {
-        const colorIndex = r * g * b; // color.reduce((p, c) => p * c, 1);
+        const colorIndex = r * g * b;
         const [min, , max] = [r, g, b].sort((a, b) => a - b);
         return colorIndex < 100000 // 黒に近い
           || colorIndex > 10000000 // 白に近い
